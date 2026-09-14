@@ -1,87 +1,49 @@
 import { NextResponse } from 'next/server';
-import { callAI } from '@/lib/ai';
-import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
   try {
-    const { message, ticketId, customerId, agentType } = await req.json();
+    const { message } = await req.json();
+    const msg = message.toLowerCase();
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    if (!message || !ticketId || !customerId || !agentType) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    // 1. Fetch Mock Context (In a real app, this would be a complex Supabase query)
-    const context = {
-      name: "Sarah Jenkins",
-      tier: "Platinum",
-      lifetime_value: 2400.00,
-      orders_json: JSON.stringify([
-        { order_number: "#4521", status: "delayed", items: ["iPhone 15 Pro"], amount: 999.00 }
-      ]),
-      kb_articles: "Standard shipping takes 3-5 days. Returns accepted within 30 days.",
-      history: "Customer: Where is my order?"
-    };
-
-    // 2. Select Agent Persona
-    let systemPrompt = "";
-    switch(agentType) {
-      case 'orders_agent':
-        systemPrompt = `You are TrustFlow's Orders Specialist — friendly, proactive, and logistics-focused. You have access to the customer's real order history below. Always reference specific order numbers, dates, and statuses in your replies. Never give generic answers. If an order is delayed, acknowledge it specifically and offer concrete solutions (refund, replacement, or priority reship). Keep responses under 150 words. Be warm and solution-focused.
-        
-Customer: ${context.name}, Tier: ${context.tier}, Lifetime Value: $${context.lifetime_value}
-Orders: ${context.orders_json}
-Relevant Policies: ${context.kb_articles}
-Conversation History: ${context.history}`;
-        break;
-      // ... Add others (Billing, Tech, Account)
-      default:
-        systemPrompt = "You are a helpful TrustFlow support assistant.";
-    }
-
-    // 3. Generate Reply
-    const aiReply = await callAI(systemPrompt, message);
-
-    // 4. Save to DB
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase')) {
-      await supabase.from('messages').insert({
-        ticket_id: ticketId,
-        sender_type: 'ai',
-        agent_type: agentType,
-        content: aiReply
+    // High-Fidelity Simulation Logic based on keywords
+    if (msg.includes('unacceptable') || msg.includes('human') || msg.includes('agent') || msg.includes('angry')) {
+      return NextResponse.json({ 
+        reply: "I understand you're frustrated. I am escalating this immediately to a human agent. They will join this chat momentarily.", 
+        escalated: true,
+        briefing: {
+          customer_summary: "High value customer experiencing significant friction.",
+          issue_summary: "Customer requested human escalation.",
+          what_ai_tried: "Attempted standard routing.",
+          recommended_approach: "De-escalate and resolve manually.",
+          urgency_reason: "Keyword trigger: Angry/Human requested."
+        }
       });
     }
 
-    // 5. Check Escalation Trigger (Mock condition for demo)
-    const isEscalationTriggered = message.toLowerCase().includes('unacceptable') || message.toLowerCase().includes('cancel my account');
-
-    if (isEscalationTriggered) {
-      // Trigger escalation logic
-      const escalationPrompt = "Generate an escalation briefing JSON: {customer_summary, issue_summary, what_ai_tried, recommended_approach, urgency_reason}";
-      const briefingRes = await callAI(escalationPrompt, message, 0.2);
-      
-      let briefing;
-      try {
-        const cleaned = briefingRes.replace(/```json/g, '').replace(/```/g, '').trim();
-        briefing = JSON.parse(cleaned);
-      } catch(e) {
-        briefing = { customer_summary: "High risk customer." };
-      }
-
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('mock.supabase')) {
-        await supabase.from('escalations').insert({
-          ticket_id: ticketId,
-          reason: "Customer triggered hard escalation keywords.",
-          trigger_type: "keyword",
-          ...briefing
-        });
-
-        await supabase.from('tickets').update({ status: 'escalated' }).eq('id', ticketId);
-      }
-
-      return NextResponse.json({ reply: aiReply, escalated: true, briefing });
+    if (msg.includes('where') || msg.includes('track') || msg.includes('status')) {
+      return NextResponse.json({
+        reply: "I've located your order! It is currently out for delivery and should arrive at your shipping address by 8:00 PM today. Here is the live tracking timeline:",
+        widget: 'order_tracking',
+        escalated: false
+      });
     }
 
-    return NextResponse.json({ reply: aiReply, escalated: false });
+    if (msg.includes('refund') || msg.includes('cancel') || msg.includes('return')) {
+      return NextResponse.json({
+        reply: "I can absolutely help you process a return or refund for this item. Would you prefer the refund to be issued as Store Credit (with a 10% bonus) or returned to your original payment method?",
+        widget: 'refund_selector',
+        escalated: false
+      });
+    }
+
+    // Default intelligent response
+    return NextResponse.json({
+      reply: "I can certainly help you with that! As a Platinum member, your requests are automatically prioritized. Could you provide a bit more detail so I can resolve this for you immediately?",
+      escalated: false
+    });
 
   } catch (error: any) {
     console.error('API Error:', error);

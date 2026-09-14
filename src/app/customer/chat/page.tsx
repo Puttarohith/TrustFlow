@@ -96,6 +96,7 @@ export default function CustomerChatPage() {
           agentType: 'orders',
           content: data.reply,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          widget: data.widget,
           analysis: {
             intent: 'orders',
             urgency: 'high',
