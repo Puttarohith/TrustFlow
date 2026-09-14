@@ -42,7 +42,7 @@ const DEFAULT_TICKETS: Ticket[] = [
     score: 72, 
     time: '2m ago', 
     agent: 'Orders AI', 
-    status: 'escalated',
+    status: 'open',
     messages: [
       {
         id: 'msg_1',
@@ -78,7 +78,7 @@ const DEFAULT_TICKETS: Ticket[] = [
     score: 95, 
     time: '15m ago', 
     agent: 'Billing AI', 
-    status: 'open',
+    status: 'escalated',
     messages: [
       {
         id: 'msg_2',
@@ -111,11 +111,11 @@ export function useTickets() {
   // Load initially and listen for tab sync
   useEffect(() => {
     const loadTickets = () => {
-      const stored = localStorage.getItem('trustflow_tickets');
+      const stored = localStorage.getItem('trustflow_tickets_v2');
       if (stored) {
         setTickets(JSON.parse(stored));
       } else {
-        localStorage.setItem('trustflow_tickets', JSON.stringify(DEFAULT_TICKETS));
+        localStorage.setItem('trustflow_tickets_v2', JSON.stringify(DEFAULT_TICKETS));
         setTickets(DEFAULT_TICKETS);
       }
     };
@@ -132,21 +132,21 @@ export function useTickets() {
   }, []);
 
   const updateTicket = (id: string, updates: Partial<Ticket>) => {
-    const stored = JSON.parse(localStorage.getItem('trustflow_tickets') || '[]');
+    const stored = JSON.parse(localStorage.getItem('trustflow_tickets_v2') || '[]');
     const updated = stored.map((t: Ticket) => t.id === id ? { ...t, ...updates } : t);
-    localStorage.setItem('trustflow_tickets', JSON.stringify(updated));
+    localStorage.setItem('trustflow_tickets_v2', JSON.stringify(updated));
     window.dispatchEvent(new Event('trustflow_sync'));
   };
 
   const createTicket = (ticket: Omit<Ticket, 'id' | 'time'>) => {
-    const stored = JSON.parse(localStorage.getItem('trustflow_tickets') || '[]');
+    const stored = JSON.parse(localStorage.getItem('trustflow_tickets_v2') || '[]');
     const newTicket = {
       ...ticket,
       id: Date.now().toString(),
       time: 'Just now'
     };
     const updated = [newTicket, ...stored];
-    localStorage.setItem('trustflow_tickets', JSON.stringify(updated));
+    localStorage.setItem('trustflow_tickets_v2', JSON.stringify(updated));
     window.dispatchEvent(new Event('trustflow_sync'));
     return newTicket.id;
   };
