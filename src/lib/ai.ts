@@ -2,7 +2,7 @@ export async function callAI(systemPrompt: string, userMessage: string, temperat
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   
   if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
-    throw new Error("PRODUCTION ERROR: GEMINI_API_KEY is not set in .env.local. Real-time AI features require a valid API key.");
+    return "SYSTEM ALERT: To enable true AI responses, you must add your `GEMINI_API_KEY` to the Vercel Environment Variables. Currently running in offline mode. Please configure your API key in the Vercel dashboard to see real-time AI inference in action!";
   }
 
   try {
