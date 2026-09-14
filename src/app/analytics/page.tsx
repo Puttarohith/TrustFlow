@@ -1,17 +1,31 @@
 'use client';
 
+import { useState } from 'react';
 import { BarChart3, TrendingUp, Users, Clock, AlertTriangle, MessageCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
-const ticketVolumeData = [
-  { name: 'Mon', total: 400, resolved: 380 },
-  { name: 'Tue', total: 450, resolved: 420 },
-  { name: 'Wed', total: 300, resolved: 290 },
-  { name: 'Thu', total: 600, resolved: 550 },
-  { name: 'Fri', total: 550, resolved: 520 },
-  { name: 'Sat', total: 200, resolved: 195 },
-  { name: 'Sun', total: 250, resolved: 240 },
-];
+const ticketVolumeData: any = {
+  '7d': [
+    { name: 'Mon', total: 40, resolved: 38 },
+    { name: 'Tue', total: 45, resolved: 42 },
+    { name: 'Wed', total: 30, resolved: 29 },
+    { name: 'Thu', total: 60, resolved: 55 },
+    { name: 'Fri', total: 55, resolved: 52 },
+    { name: 'Sat', total: 20, resolved: 19 },
+    { name: 'Sun', total: 25, resolved: 24 },
+  ],
+  '30d': [
+    { name: 'Week 1', total: 400, resolved: 380 },
+    { name: 'Week 2', total: 450, resolved: 420 },
+    { name: 'Week 3', total: 300, resolved: 290 },
+    { name: 'Week 4', total: 600, resolved: 550 },
+  ],
+  '90d': [
+    { name: 'Month 1', total: 1600, resolved: 1520 },
+    { name: 'Month 2', total: 1850, resolved: 1750 },
+    { name: 'Month 3', total: 2100, resolved: 1980 },
+  ]
+};
 
 const categoryData = [
   { name: 'Orders', count: 1240 },
@@ -28,6 +42,8 @@ const statusData = [
 ];
 
 export default function AnalyticsPage() {
+  const [timeframe, setTimeframe] = useState<'7d' | '30d' | '90d'>('30d');
+
   return (
     <div className="min-h-screen bg-background p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -39,9 +55,9 @@ export default function AnalyticsPage() {
             <p className="text-text-secondary">Track performance, AI resolution rates, and customer sentiment.</p>
           </div>
           <div className="flex gap-2 bg-surface border border-border p-1 rounded-lg">
-            <button className="px-4 py-1.5 text-sm rounded-md hover:bg-white/5 text-text-secondary">Last 7d</button>
-            <button className="px-4 py-1.5 text-sm rounded-md bg-white/10 text-white font-medium">30d</button>
-            <button className="px-4 py-1.5 text-sm rounded-md hover:bg-white/5 text-text-secondary">90d</button>
+            <button onClick={() => setTimeframe('7d')} className={`px-4 py-1.5 text-sm rounded-md font-medium transition-colors ${timeframe === '7d' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-text-secondary'}`}>Last 7d</button>
+            <button onClick={() => setTimeframe('30d')} className={`px-4 py-1.5 text-sm rounded-md font-medium transition-colors ${timeframe === '30d' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-text-secondary'}`}>30d</button>
+            <button onClick={() => setTimeframe('90d')} className={`px-4 py-1.5 text-sm rounded-md font-medium transition-colors ${timeframe === '90d' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-text-secondary'}`}>90d</button>
           </div>
         </div>
 
@@ -120,11 +136,14 @@ export default function AnalyticsPage() {
 
         {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-card p-6 rounded-xl">
-            <h3 className="text-lg font-bold text-white mb-6">Ticket Volume (Last 7 Days)</h3>
+          <div className="lg:col-span-2 glass-card p-6 rounded-xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-white">Ticket Volume & Resolution</h3>
+              <button className="text-xs text-primary hover:text-primary-dark transition-colors">Export CSV</button>
+            </div>
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={ticketVolumeData}>
+                <AreaChart data={ticketVolumeData[timeframe]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>

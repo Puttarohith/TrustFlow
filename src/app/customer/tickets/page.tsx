@@ -3,46 +3,21 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Box, CreditCard, Shield, Wrench, MessageCircle, Star } from 'lucide-react';
-
-const MOCK_TICKETS = [
-  {
-    id: '1',
-    subject: 'Where is my order? #4521',
-    status: 'In Progress',
-    intent: 'Orders',
-    urgency: 'High',
-    lastMessage: "I am escalating this immediately to a human Billing Specialist...",
-    timeAgo: '10m ago',
-    rating: null
-  },
-  {
-    id: '2',
-    subject: 'Return request for order #4510',
-    status: 'Resolved',
-    intent: 'Orders',
-    urgency: 'Medium',
-    lastMessage: "Your return label has been generated and sent to your email.",
-    timeAgo: '2d ago',
-    rating: 5
-  },
-  {
-    id: '3',
-    subject: 'Payment failed on checkout',
-    status: 'Resolved',
-    intent: 'Billing',
-    urgency: 'Low',
-    lastMessage: "The issue with the payment gateway has been resolved.",
-    timeAgo: '5d ago',
-    rating: 4
-  }
-];
+import { useTickets } from '@/hooks/use-tickets';
 
 export default function CustomerTicketsPage() {
   const [filter, setFilter] = useState('All');
+  const { tickets } = useTickets();
 
-  const filteredTickets = MOCK_TICKETS.filter(ticket => 
-    filter === 'All' ? true : ticket.status === filter
-  );
+  // Filter to only show customer's tickets. In a real app we'd filter by customer ID.
+  const myTickets = tickets.filter(t => t.customer === 'Michael Chen' || t.customer === 'Sarah Jenkins');
+
+  const filteredTickets = myTickets.filter(ticket => {
+    if (filter === 'All') return true;
+    if (filter === 'Open') return ticket.status !== 'resolved';
+    if (filter === 'Resolved') return ticket.status === 'resolved';
+    return true;
+  });
 
   const getIntentIcon = (intent: string) => {
     switch(intent) {
@@ -64,40 +39,52 @@ export default function CustomerTicketsPage() {
   };
 
   const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'Open': return 'bg-status-info/10 text-status-info border-status-info/20';
-      case 'In Progress': return 'bg-primary/10 text-primary border-primary/20';
-      case 'Resolved': return 'bg-status-success/10 text-status-success border-status-success/20';
+    switch(status.toLowerCase()) {
+      case 'open': return 'bg-status-info/10 text-status-info border-status-info/20';
+      case 'in progress': return 'bg-primary/10 text-primary border-primary/20';
+      case 'resolved': return 'bg-status-success/10 text-status-success border-status-success/20';
       default: return 'bg-surfaceLight text-text-secondary border-border';
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Header */}
-      <div className="p-8 border-b border-border bg-surface/30">
-        <h1 className="text-3xl font-bold text-white mb-6">My Support Tickets</h1>
+    <div className="min-h-screen bg-background p-4 md:p-8 overflow-y-auto">
+      <div className="max-w-4xl mx-auto space-y-6">
         
-        {/* Filter Tabs */}
-        <div className="flex gap-2 bg-surface p-1 rounded-lg w-max border border-border">
-          {['All', 'Open', 'In Progress', 'Resolved'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                filter === tab 
-                  ? 'bg-white/10 text-white shadow-sm' 
-                  : 'text-text-secondary hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">My Support Tickets</h1>
+            <p className="text-sm text-text-secondary">View and manage your recent customer service requests.</p>
+          </div>
+          <Link href="/customer/chat" className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-all shadow-lg hover:shadow-primary/20 whitespace-nowrap">
+            New Support Request
+          </Link>
         </div>
-      </div>
 
-      {/* Tickets Grid */}
-      <div className="flex-grow p-8 overflow-y-auto">
+        {/* Filters */}
+        <div className="flex gap-2 bg-surface p-1.5 rounded-xl border border-border w-fit">
+          <button 
+            onClick={() => setFilter('All')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === 'All' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-white hover:bg-white/5'}`}
+          >
+            All Tickets
+          </button>
+          <button 
+            onClick={() => setFilter('Open')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === 'Open' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-white hover:bg-white/5'}`}
+          >
+            Open & Active
+          </button>
+          <button 
+            onClick={() => setFilter('Resolved')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === 'Resolved' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-white hover:bg-white/5'}`}
+          >
+            Resolved
+          </button>
+        </div>
+
+        {/* Tickets Grid */}
         {filteredTickets.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-24 h-24 mb-6 rounded-full bg-surface border-2 border-dashed border-border flex items-center justify-center text-4xl">
@@ -133,35 +120,38 @@ export default function CustomerTicketsPage() {
                     {getIntentIcon(ticket.intent)} {ticket.intent}
                   </span>
                   <span className="text-xs text-text-secondary">
-                    • {ticket.timeAgo}
+                    • {ticket.time}
                   </span>
                 </div>
 
                 <div className="bg-surface/50 rounded-lg p-3 border border-border mb-6 flex-grow">
                   <p className="text-sm text-text-secondary line-clamp-2 italic">
-                    "{ticket.lastMessage}"
+                    "{ticket.messages[ticket.messages.length - 1]?.content || 'Ticket opened.'}"
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between mt-auto">
-                  {ticket.rating ? (
+                  {ticket.status === 'resolved' ? (
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
                         <Star 
                           key={i} 
-                          className={`w-4 h-4 ${i < ticket.rating! ? 'fill-yellow-500 text-yellow-500' : 'fill-surface text-border'}`} 
+                          className={`w-4 h-4 ${i < 5 ? 'fill-yellow-500 text-yellow-500' : 'fill-surface text-border'}`} 
                         />
                       ))}
                     </div>
                   ) : (
-                    <div className="text-xs text-text-secondary">In Progress...</div>
+                    <span className="text-xs text-primary font-medium flex items-center gap-1">
+                      <MessageCircle className="w-4 h-4" /> 
+                      {ticket.messages.length} messages
+                    </span>
                   )}
                   
                   <Link 
                     href="/customer/chat"
                     className="text-sm font-bold text-primary hover:text-primary-dark transition-colors"
                   >
-                    {ticket.status === 'Resolved' ? 'View Transcript' : 'Continue Chat'} →
+                    {ticket.status === 'resolved' ? 'View Transcript' : 'Continue Chat'} →
                   </Link>
                 </div>
               </div>
