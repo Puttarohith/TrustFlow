@@ -83,7 +83,7 @@ const DEFAULT_TICKETS: Ticket[] = [
 ];
 
 export function useTickets() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>(DEFAULT_TICKETS);
 
   // Load initially and listen for tab sync
   useEffect(() => {

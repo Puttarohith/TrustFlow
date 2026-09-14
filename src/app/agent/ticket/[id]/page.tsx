@@ -22,6 +22,10 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
 
   const [humanReply, setHumanReply] = useState('');
 
+  if (!ticket) {
+    return <div className="p-8 text-white">Loading ticket details...</div>;
+  }
+
   const handleSendReply = () => {
     if (!humanReply.trim() || !ticket) return;
     

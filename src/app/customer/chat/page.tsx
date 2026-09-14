@@ -36,6 +36,7 @@ export default function CustomerChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const isEscalated = ticket?.status === 'escalated';
+  const isResolved = ticket?.status === 'resolved';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +45,10 @@ export default function CustomerChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  if (!ticket) {
+    return <div className="p-8 text-white">Connecting to chat...</div>;
+  }
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
