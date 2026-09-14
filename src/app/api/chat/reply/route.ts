@@ -9,21 +9,30 @@ export async function POST(req: Request) {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     // High-Fidelity Simulation Logic based on keywords
-    if (msg.includes('unacceptable') || msg.includes('human') || msg.includes('agent') || msg.includes('angry')) {
+    if (
+      msg.includes('unacceptable') || 
+      msg.includes('human') || 
+      msg.includes('agent') || 
+      msg.includes('angry') ||
+      msg.includes('support') ||
+      msg.includes('person') ||
+      msg.includes('representative') ||
+      msg.includes('real')
+    ) {
       return NextResponse.json({ 
-        reply: "I understand you're frustrated. I am escalating this immediately to a human agent. They will join this chat momentarily.", 
+        reply: "I understand you'd like to speak with our support team. I am escalating this immediately to a human agent. They will join this chat momentarily.", 
         escalated: true,
         briefing: {
           customer_summary: "High value customer experiencing significant friction.",
           issue_summary: "Customer requested human escalation.",
           what_ai_tried: "Attempted standard routing.",
           recommended_approach: "De-escalate and resolve manually.",
-          urgency_reason: "Keyword trigger: Angry/Human requested."
+          urgency_reason: "Keyword trigger: Human/Support requested."
         }
       });
     }
 
-    if (msg.includes('where') || msg.includes('track') || msg.includes('status')) {
+    if (msg.includes('where') || msg.includes('track') || msg.includes('status') || msg.includes('delivery')) {
       return NextResponse.json({
         reply: "I've located your order! It is currently out for delivery and should arrive at your shipping address by 8:00 PM today. Here is the live tracking timeline:",
         widget: 'order_tracking',
@@ -31,7 +40,7 @@ export async function POST(req: Request) {
       });
     }
 
-    if (msg.includes('refund') || msg.includes('cancel') || msg.includes('return')) {
+    if (msg.includes('refund') || msg.includes('cancel') || msg.includes('return') || msg.includes('money back') || msg.includes('change')) {
       return NextResponse.json({
         reply: "I can absolutely help you process a return or refund for this item. Would you prefer the refund to be issued as Store Credit (with a 10% bonus) or returned to your original payment method?",
         widget: 'refund_selector',
