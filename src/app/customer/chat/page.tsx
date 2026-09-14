@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Box, Shield, CreditCard, Wrench, MoreVertical, Star, MessageCircle, CheckCircle } from 'lucide-react';
+import { Send, Paperclip, Box, Shield, CreditCard, Wrench, MoreVertical, Star, MessageCircle, CheckCircle, MapPin, Package, Truck, Check, Wallet, Coins } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -218,6 +218,44 @@ export default function CustomerChatPage() {
               )}
               
               <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+
+              {/* Generative UI Widgets */}
+              {msg.widget === 'order_tracking' && (
+                <div className="mt-4 p-4 bg-background border border-border rounded-xl">
+                  <h4 className="text-xs font-bold text-white mb-3 flex items-center gap-2"><Package className="w-4 h-4 text-primary" /> Live Tracking: #9021</h4>
+                  <div className="relative pl-4 space-y-4 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-border before:to-border">
+                    <div className="relative flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-primary z-10 ring-4 ring-background"></div>
+                      <div><p className="text-xs font-bold text-white">Shipped</p><p className="text-[10px] text-text-secondary">Sept 10, 10:00 AM</p></div>
+                    </div>
+                    <div className="relative flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-primary animate-pulse z-10 ring-4 ring-background"></div>
+                      <div><p className="text-xs font-bold text-white">Out for Delivery</p><p className="text-[10px] text-primary">Today, 8:30 AM</p></div>
+                    </div>
+                    <div className="relative flex items-center gap-3 opacity-50">
+                      <div className="w-3 h-3 rounded-full bg-surface border border-border z-10 ring-4 ring-background"></div>
+                      <div><p className="text-xs font-bold text-white">Delivered</p><p className="text-[10px] text-text-secondary">Pending</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {msg.widget === 'refund_selector' && (
+                <div className="mt-4 flex flex-col gap-2">
+                  <button className="flex items-center justify-between p-3 bg-primary/10 border border-primary/30 rounded-lg hover:bg-primary/20 transition-colors text-left group">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/20 rounded-md text-primary"><Coins className="w-4 h-4" /></div>
+                      <div><p className="text-xs font-bold text-white group-hover:text-primary transition-colors">Store Credit (+10% Bonus)</p><p className="text-[10px] text-primary/70">Instant • $382.80 Total</p></div>
+                    </div>
+                  </button>
+                  <button className="flex items-center justify-between p-3 bg-surface border border-border rounded-lg hover:border-white/20 transition-colors text-left group">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/5 rounded-md text-text-secondary group-hover:text-white transition-colors"><Wallet className="w-4 h-4" /></div>
+                      <div><p className="text-xs font-bold text-white">Original Payment Method</p><p className="text-[10px] text-text-secondary">3-5 Business Days • $348.00</p></div>
+                    </div>
+                  </button>
+                </div>
+              )}
 
               {/* AI Analysis Dropdown (Mocked Expansion) */}
               {msg.analysis && (

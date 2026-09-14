@@ -20,6 +20,7 @@ export type Ticket = {
     agentType?: string;
     content: string;
     timestamp: string;
+    widget?: 'order_tracking' | 'refund_selector' | 'none';
     analysis?: {
       intent: string;
       urgency: string;
@@ -49,6 +50,20 @@ const DEFAULT_TICKETS: Ticket[] = [
         agentType: 'Orders AI',
         content: 'Hello Sarah! I see you are a Platinum member. I am TrustFlow\'s Orders Specialist. How can I assist you with your purchases today?',
         timestamp: '10:00 AM'
+      },
+      {
+        id: 'msg_track',
+        sender: 'customer',
+        content: 'Where is my order #9021?',
+        timestamp: '10:01 AM'
+      },
+      {
+        id: 'msg_track_ai',
+        sender: 'ai',
+        agentType: 'Orders AI',
+        content: 'I have checked our logistics provider. Your package is currently out for delivery and should arrive today!',
+        timestamp: '10:01 AM',
+        widget: 'order_tracking'
       }
     ] 
   },
@@ -77,6 +92,14 @@ const DEFAULT_TICKETS: Ticket[] = [
         agentType: 'Billing AI',
         content: 'I am so sorry to hear that you were charged twice, Michael. I understand how frustrating that is. I have checked our internal ledger for order #9021, but I am only seeing a single successful capture of $348.00.\n\nSince you are seeing two charges on your bank statement, I am escalating this immediately to a human Billing Specialist to investigate the payment gateway logs. They will be with you shortly.',
         timestamp: '10:01 AM'
+      },
+      {
+        id: 'msg_4',
+        sender: 'human',
+        agentType: 'Human Agent',
+        content: 'Hi Michael, I have confirmed the double charge via Stripe. I am initiating a refund for the duplicate amount immediately. How would you like to receive your refund?',
+        timestamp: '10:05 AM',
+        widget: 'refund_selector'
       }
     ] 
   }
