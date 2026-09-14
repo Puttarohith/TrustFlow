@@ -1,7 +1,17 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { LayoutDashboard, AlertTriangle, Search, BookOpen, Users, BarChart2, Settings, LogOut } from 'lucide-react';
+import { useTickets } from '@/hooks/use-tickets';
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
+  const { tickets } = useTickets();
+  const pathname = usePathname();
+
+  const openTicketsCount = tickets.filter(t => t.status !== 'resolved').length;
+  const escalatedCount = tickets.filter(t => t.status === 'escalated').length;
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Sidebar */}
@@ -24,7 +34,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
               <span className="text-sm font-bold text-purple-400">AT</span>
             </div>
             <div>
-              <h2 className="font-semibold text-sm">Agent Team</h2>
+              <h2 className="font-semibold text-sm text-white">Agent Team</h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-2 h-2 rounded-full bg-status-success animate-pulse"></span>
                 <span className="text-xs text-text-secondary">Online</span>
@@ -35,21 +45,24 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
 
         {/* Navigation */}
         <div className="p-3 flex-grow overflow-y-auto">
+          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2 px-3">Navigation</div>
           <nav className="space-y-1">
-            <Link href="/agent" className="flex items-center justify-between px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium transition-colors">
+            <Link href="/agent" className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${pathname === '/agent' ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-white/5 hover:text-white'}`}>
               <div className="flex items-center gap-3 text-sm">
                 <LayoutDashboard className="w-4 h-4" />
                 Ticket Queue
               </div>
-              <span className="bg-primary text-white text-[10px] px-2 py-0.5 rounded-full font-bold">12</span>
+              <span className="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">{openTicketsCount}</span>
             </Link>
             
-            <Link href="/agent/escalations" className="flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors">
+            <Link href="/agent/escalations" className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${pathname === '/agent/escalations' ? 'bg-white/5 text-white' : 'text-text-secondary hover:bg-white/5 hover:text-white'}`}>
               <div className="flex items-center gap-3 text-sm">
                 <AlertTriangle className="w-4 h-4" />
                 Escalations
               </div>
-              <span className="bg-status-danger text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">3</span>
+              {escalatedCount > 0 && (
+                <span className="bg-status-danger text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">{escalatedCount}</span>
+              )}
             </Link>
             
             <Link href="/agent/investigations" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
