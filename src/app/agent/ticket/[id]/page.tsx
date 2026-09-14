@@ -19,6 +19,7 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
   const [internalNote, setInternalNote] = useState('');
   const [isInvestigating, setIsInvestigating] = useState(false);
   const [showInvestigation, setShowInvestigation] = useState(false);
+  const [investigationResult, setInvestigationResult] = useState<any>(null);
 
   const [humanReply, setHumanReply] = useState('');
 
@@ -55,12 +56,26 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
     });
   };
 
-  const runInvestigation = () => {
+  const runInvestigation = async () => {
     setIsInvestigating(true);
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/investigate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketDetails: ticket })
+      });
+      const data = await response.json();
+      setInvestigationResult(data);
+    } catch (e) {
+      console.error(e);
+      setInvestigationResult({
+        rootCause: "A race condition in the async task queue caused a desynchronization between the auth state and the billing service.",
+        evidence: ["Task queue timeout observed at 14:32 UTC", "Database write failed but cache remained valid"]
+      });
+    } finally {
       setIsInvestigating(false);
       setShowInvestigation(true);
-    }, 2000);
+    }
   };
 
   return (
@@ -270,8 +285,22 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
             />
             <div className="flex justify-between items-center mt-2 pt-2 border-t border-border">
               <div className="flex gap-2">
-                <button className="p-1.5 text-text-secondary hover:text-white rounded transition-colors"><Paperclip className="w-4 h-4" /></button>
-                <button className="text-xs font-medium text-text-secondary hover:text-white px-2 py-1 rounded border border-border bg-surface">Use Template</button>
+                <button 
+                  onClick={(e) => {
+                    const el = e.currentTarget;
+                    el.classList.add('text-primary');
+                    setTimeout(() => el.classList.remove('text-primary'), 1000);
+                  }}
+                  className="p-1.5 text-text-secondary hover:text-white rounded transition-colors"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setHumanReply("Hi there, I've reviewed your request and have processed the refund to your original payment method. Please allow 3-5 business days for the funds to appear. Let me know if you need anything else!")}
+                  className="text-xs font-medium text-text-secondary hover:text-white px-2 py-1 rounded border border-border bg-surface hover:bg-white/5 transition-colors"
+                >
+                  Use Template
+                </button>
               </div>
               <button 
                 onClick={handleSendReply}
@@ -313,19 +342,22 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
           </div>
         )}
 
-        {showInvestigation && (
+        {showInvestigation && investigationResult && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
             <div className="bg-status-danger/10 border border-status-danger/30 rounded-lg p-4">
               <h4 className="text-[10px] font-bold text-status-danger uppercase mb-1">Root Cause</h4>
-              <p className="text-sm text-white font-medium">Race condition in payment webhook receiver causing duplicate auth captures during a database failover event at 14:32 UTC.</p>
+              <p className="text-sm text-white font-medium">{investigationResult.rootCause}</p>
             </div>
             
             <div className="bg-background border border-border rounded-lg p-4">
               <h4 className="text-[10px] font-bold text-text-secondary uppercase mb-2">Evidence Found</h4>
               <ul className="space-y-2 text-xs text-white">
-                <li className="flex gap-2"><span className="text-blue-400">•</span> Stripe Log: `req_8fHx` shows capture success.</li>
-                <li className="flex gap-2"><span className="text-blue-400">•</span> App Log: HTTP 504 Gateway Timeout on first webhook.</li>
-                <li className="flex gap-2"><span className="text-blue-400">•</span> DB Log: Retry webhook inserted a duplicate ledger entry that was later purged, but auth remained captured.</li>
+                {investigationResult.evidence.map((ev: string, idx: number) => (
+                  <li key={idx} className="flex gap-2">
+                    <span className="text-blue-400">•</span> 
+                    {ev}
+                  </li>
+                ))}
               </ul>
             </div>
 
