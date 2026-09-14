@@ -32,6 +32,7 @@ export default function CustomerChatPage() {
   const messages = ticket?.messages || [];
 
   const [inputValue, setInputValue] = useState('');
+  const [attachmentName, setAttachmentName] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -52,18 +53,23 @@ export default function CustomerChatPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim() || !ticket || isResolved || isEscalated) return;
+    if ((!inputValue.trim() && !attachmentName) || !ticket || isResolved || isEscalated) return;
+
+    const finalContent = attachmentName 
+      ? `${inputValue}\n\n[Attached: ${attachmentName}]`
+      : inputValue;
 
     // Add user message
     const userMessage: any = {
       id: Date.now().toString(),
       sender: 'customer',
-      content: inputValue,
+      content: finalContent.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
     updateTicket(ticket.id, { messages: [...messages, userMessage] });
     setInputValue('');
+    setAttachmentName('');
     setIsTyping(true);
 
     try {
@@ -310,42 +316,55 @@ export default function CustomerChatPage() {
       {/* Input Area */}
       <div className="p-4 bg-surface border-t border-border">
         <form onSubmit={handleSend} className="relative max-w-4xl mx-auto flex items-end gap-2">
+          <input 
+            type="file" 
+            id="customer-file-upload" 
+            className="hidden" 
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                setAttachmentName(e.target.files[0].name);
+              }
+            }}
+          />
           <button 
             type="button" 
-            onClick={(e) => {
-              const el = e.currentTarget;
-              el.classList.add('text-primary');
-              setTimeout(() => el.classList.remove('text-primary'), 1000);
-            }}
-            className="p-3 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors flex-shrink-0"
+            disabled={isResolved || isEscalated}
+            onClick={() => document.getElementById('customer-file-upload')?.click()}
+            className="p-3 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors flex-shrink-0 disabled:opacity-50"
           >
             <Paperclip className="w-5 h-5" />
           </button>
           
-          <div className="relative flex-grow bg-background border border-border rounded-xl focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
-            <textarea 
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              disabled={isResolved || isEscalated}
-              placeholder={isResolved ? "This ticket has been resolved." : isEscalated ? "Waiting for a human agent..." : "Describe your issue... (e.g. 'My order #4521 hasn't arrived yet')"}
-              className="w-full bg-transparent p-4 text-sm text-white resize-none outline-none max-h-32 min-h-[56px] custom-scrollbar disabled:opacity-50"
-              rows={1}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend(e);
-                }
-              }}
-            />
-            <div className="absolute right-3 bottom-3 text-[10px] text-text-secondary">
-              {inputValue.length}/500
+          <div className="flex-grow flex flex-col gap-2">
+            {attachmentName && (
+              <div className="self-start inline-flex items-center gap-2 bg-white/10 text-white text-xs px-3 py-1.5 rounded-full mt-2 ml-2">
+                <Paperclip className="w-3 h-3" />
+                {attachmentName}
+                <button type="button" onClick={() => setAttachmentName('')} className="hover:text-status-danger ml-1">✕</button>
+              </div>
+            )}
+            <div className="relative flex-grow bg-background border border-border rounded-xl focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+              <textarea 
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                disabled={isResolved || isEscalated}
+                placeholder={isResolved ? "This ticket has been resolved." : isEscalated ? "Waiting for a human agent..." : "Describe your issue... (e.g. 'My order #4521 hasn't arrived yet')"}
+                className="w-full bg-transparent p-4 text-sm text-white resize-none outline-none max-h-32 min-h-[56px] custom-scrollbar disabled:opacity-50"
+                rows={1}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend(e);
+                  }
+                }}
+              />
             </div>
           </div>
 
           <button 
-            type="submit" 
-            disabled={!inputValue.trim() || isEscalated || isResolved}
-            className="p-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+            type="submit"
+            disabled={(!inputValue.trim() && !attachmentName) || isTyping || isResolved || isEscalated}
+            className="p-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 flex-shrink-0"
           >
             <Send className="w-5 h-5" />
           </button>
