@@ -139,7 +139,16 @@ export default function AnalyticsPage() {
           <div className="lg:col-span-2 glass-card p-6 rounded-xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold text-white">Ticket Volume & Resolution</h3>
-              <button className="text-xs text-primary hover:text-primary-dark transition-colors">Export CSV</button>
+              <button 
+                onClick={(e) => {
+                  const btn = e.currentTarget;
+                  btn.textContent = 'Exported!';
+                  setTimeout(() => btn.textContent = 'Export CSV', 2000);
+                }}
+                className="text-xs text-primary hover:text-primary-dark transition-colors"
+              >
+                Export CSV
+              </button>
             </div>
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">

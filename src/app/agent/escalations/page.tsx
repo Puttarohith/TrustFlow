@@ -25,7 +25,7 @@ export default function EscalationsPage() {
             </div>
           </div>
           
-          <Link href="/agent/ticket/1" className="bg-surface hover:bg-white/10 text-white px-4 py-2 rounded border border-border transition-colors font-medium text-sm flex items-center gap-2">
+          <Link href="/agent/ticket/2" className="bg-surface hover:bg-white/10 text-white px-4 py-2 rounded border border-border transition-colors font-medium text-sm flex items-center gap-2">
             View Ticket <ChevronRight className="w-4 h-4" />
           </Link>
         </div>

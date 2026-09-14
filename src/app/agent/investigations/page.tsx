@@ -32,7 +32,7 @@ export default function InvestigationsPage() {
             </div>
           </div>
           
-          <Link href="/agent/ticket/1" className="w-full justify-center bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-4 py-2 rounded transition-colors font-medium text-sm flex items-center gap-2">
+          <Link href="/agent/ticket/2" className="w-full justify-center bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-4 py-2 rounded transition-colors font-medium text-sm flex items-center gap-2">
             View Root Cause Report <ChevronRight className="w-4 h-4" />
           </Link>
         </div>

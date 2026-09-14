@@ -299,7 +299,15 @@ export default function CustomerChatPage() {
       {/* Input Area */}
       <div className="p-4 bg-surface border-t border-border">
         <form onSubmit={handleSend} className="relative max-w-4xl mx-auto flex items-end gap-2">
-          <button type="button" className="p-3 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors flex-shrink-0">
+          <button 
+            type="button" 
+            onClick={(e) => {
+              const el = e.currentTarget;
+              el.classList.add('text-primary');
+              setTimeout(() => el.classList.remove('text-primary'), 1000);
+            }}
+            className="p-3 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors flex-shrink-0"
+          >
             <Paperclip className="w-5 h-5" />
           </button>
           
