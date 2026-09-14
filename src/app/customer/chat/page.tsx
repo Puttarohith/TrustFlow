@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Box, Shield, CreditCard, Wrench, MoreVertical, Star, MessageCircle } from 'lucide-react';
+import { Send, Paperclip, Box, Shield, CreditCard, Wrench, MoreVertical, Star, MessageCircle, CheckCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -163,8 +163,21 @@ export default function CustomerChatPage() {
         </div>
       </header>
 
+      {/* Resolved Banner */}
+      {isResolved && (
+        <div className="bg-status-success/10 border-b border-status-success/30 p-4 flex flex-col items-center justify-center text-center animate-in slide-in-from-top duration-300">
+          <h3 className="text-status-success font-bold text-sm flex items-center gap-2 mb-1">
+            <CheckCircle className="w-4 h-4" />
+            Ticket Resolved
+          </h3>
+          <p className="text-xs text-text-secondary max-w-md">
+            This conversation has been marked as resolved. If you need further assistance, please open a new ticket.
+          </p>
+        </div>
+      )}
+
       {/* Escalation Banner */}
-      {isEscalated && (
+      {isEscalated && !isResolved && (
         <div className="bg-status-danger/10 border-b border-status-danger/30 p-4 flex flex-col items-center justify-center text-center animate-in slide-in-from-top duration-300">
           <h3 className="text-status-danger font-bold text-sm flex items-center gap-2 mb-1">
             <Shield className="w-4 h-4" />
@@ -251,8 +264,9 @@ export default function CustomerChatPage() {
             <textarea 
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Describe your issue... (e.g. 'My order #4521 hasn't arrived yet')"
-              className="w-full bg-transparent p-4 text-sm text-white resize-none outline-none max-h-32 min-h-[56px] custom-scrollbar"
+              disabled={isResolved}
+              placeholder={isResolved ? "This ticket has been resolved." : "Describe your issue... (e.g. 'My order #4521 hasn't arrived yet')"}
+              className="w-full bg-transparent p-4 text-sm text-white resize-none outline-none max-h-32 min-h-[56px] custom-scrollbar disabled:opacity-50"
               rows={1}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -268,7 +282,7 @@ export default function CustomerChatPage() {
 
           <button 
             type="submit" 
-            disabled={!inputValue.trim() || isEscalated}
+            disabled={!inputValue.trim() || isEscalated || isResolved}
             className="p-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
           >
             <Send className="w-5 h-5" />

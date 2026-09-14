@@ -35,6 +35,18 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
       }]
     });
     setHumanReply('');
+  const handleResolve = () => {
+    if (!ticket) return;
+    updateTicket(ticket.id, {
+      status: 'resolved',
+      messages: [...messages, {
+        id: Date.now().toString(),
+        sender: 'human',
+        agentType: 'System',
+        content: 'This ticket has been marked as resolved.',
+        timestamp: 'Just now'
+      }]
+    });
   };
 
   const runInvestigation = () => {
@@ -54,7 +66,7 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
         {/* Customer Profile Card */}
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-20 h-20 rounded-full border-4 border-yellow-500/30 bg-yellow-500/10 flex items-center justify-center mb-3">
-            <span className="text-2xl font-bold text-yellow-500">{ticket.customer.split(' ').map(n=>n[0]).join('')}</span>
+            <span className="text-2xl font-bold text-yellow-500">{ticket.customer.split(' ').map((n: string) => n[0]).join('')}</span>
           </div>
           <h2 className="text-lg font-bold text-white">{ticket.customer}</h2>
           <p className="text-sm text-text-secondary mb-2">{ticket.customer.toLowerCase().replace(' ', '.')}@example.com</p>
@@ -121,13 +133,23 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
                   Escalated
                 </span>
               )}
+              {ticket.status === 'resolved' && (
+                <span className="bg-status-success/20 text-status-success text-[10px] px-2 py-0.5 rounded uppercase font-bold border border-status-success/30">
+                  Resolved
+                </span>
+              )}
             </h2>
             <p className="text-xs text-text-secondary">Ticket #{ticket.id} • Assigned to: Human Queue</p>
           </div>
           <div className="flex gap-2">
-            <button className="px-3 py-1.5 bg-status-success/10 text-status-success border border-status-success/30 rounded text-xs font-bold hover:bg-status-success/20 transition-colors">
-              Resolve Ticket
-            </button>
+            {ticket.status !== 'resolved' && (
+              <button 
+                onClick={handleResolve}
+                className="px-3 py-1.5 bg-status-success/10 text-status-success border border-status-success/30 rounded text-xs font-bold hover:bg-status-success/20 transition-colors"
+              >
+                Resolve Ticket
+              </button>
+            )}
           </div>
         </div>
 
