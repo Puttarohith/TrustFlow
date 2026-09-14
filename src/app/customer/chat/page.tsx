@@ -52,7 +52,7 @@ export default function CustomerChatPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim() || !ticket) return;
+    if (!inputValue.trim() || !ticket || isResolved || isEscalated) return;
 
     // Add user message
     const userMessage: any = {
@@ -82,6 +82,10 @@ export default function CustomerChatPage() {
       });
 
       const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      }
 
       setIsTyping(false);
 
@@ -315,8 +319,8 @@ export default function CustomerChatPage() {
             <textarea 
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              disabled={isResolved}
-              placeholder={isResolved ? "This ticket has been resolved." : "Describe your issue... (e.g. 'My order #4521 hasn't arrived yet')"}
+              disabled={isResolved || isEscalated}
+              placeholder={isResolved ? "This ticket has been resolved." : isEscalated ? "Waiting for a human agent..." : "Describe your issue... (e.g. 'My order #4521 hasn't arrived yet')"}
               className="w-full bg-transparent p-4 text-sm text-white resize-none outline-none max-h-32 min-h-[56px] custom-scrollbar disabled:opacity-50"
               rows={1}
               onKeyDown={(e) => {
