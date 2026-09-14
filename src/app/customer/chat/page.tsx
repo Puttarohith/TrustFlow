@@ -105,11 +105,17 @@ export default function CustomerChatPage() {
           }
         };
 
-        updateTicket(ticket.id, { 
+        const updates: any = {
           messages: [...messages, userMessage, aiResponse],
           status: data.escalated ? 'escalated' : ticket.status,
           time: 'Just now'
-        });
+        };
+
+        if (data.briefing) {
+          updates.briefing = data.briefing;
+        }
+
+        updateTicket(ticket.id, updates);
       }
     } catch (error) {
       console.error('Failed to send message:', error);

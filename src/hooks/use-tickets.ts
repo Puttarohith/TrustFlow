@@ -14,6 +14,13 @@ export type Ticket = {
   time: string;
   agent: string;
   status: 'open' | 'in_progress' | 'escalated' | 'resolved';
+  briefing?: {
+    customer_summary: string;
+    issue_summary: string;
+    what_ai_tried: string;
+    recommended_approach: string;
+    urgency_reason: string;
+  };
   messages: Array<{
     id: string;
     sender: 'customer' | 'ai' | 'human';
@@ -79,6 +86,13 @@ const DEFAULT_TICKETS: Ticket[] = [
     time: '15m ago', 
     agent: 'Billing AI', 
     status: 'escalated',
+    briefing: {
+      customer_summary: "High value Gold tier customer. High churn risk due to repeated billing issues.",
+      issue_summary: "Customer claims they were double charged for order #9021 ($348.00 x2).",
+      what_ai_tried: "Checked ledger, saw single charge. Customer provided bank screenshot (escalated).",
+      recommended_approach: "Verify with Stripe dashboard. Immediate refund of duplicate charge + courtesy credit.",
+      urgency_reason: "Keyword trigger: Calling credit card company."
+    },
     messages: [
       {
         id: 'msg_2',
@@ -111,11 +125,11 @@ export function useTickets() {
   // Load initially and listen for tab sync
   useEffect(() => {
     const loadTickets = () => {
-      const stored = localStorage.getItem('trustflow_tickets_v2');
+      const stored = localStorage.getItem('trustflow_tickets_v3');
       if (stored) {
         setTickets(JSON.parse(stored));
       } else {
-        localStorage.setItem('trustflow_tickets_v2', JSON.stringify(DEFAULT_TICKETS));
+        localStorage.setItem('trustflow_tickets_v3', JSON.stringify(DEFAULT_TICKETS));
         setTickets(DEFAULT_TICKETS);
       }
     };
@@ -132,21 +146,21 @@ export function useTickets() {
   }, []);
 
   const updateTicket = (id: string, updates: Partial<Ticket>) => {
-    const stored = JSON.parse(localStorage.getItem('trustflow_tickets_v2') || '[]');
+    const stored = JSON.parse(localStorage.getItem('trustflow_tickets_v3') || '[]');
     const updated = stored.map((t: Ticket) => t.id === id ? { ...t, ...updates } : t);
-    localStorage.setItem('trustflow_tickets_v2', JSON.stringify(updated));
+    localStorage.setItem('trustflow_tickets_v3', JSON.stringify(updated));
     window.dispatchEvent(new Event('trustflow_sync'));
   };
 
   const createTicket = (ticket: Omit<Ticket, 'id' | 'time'>) => {
-    const stored = JSON.parse(localStorage.getItem('trustflow_tickets_v2') || '[]');
+    const stored = JSON.parse(localStorage.getItem('trustflow_tickets_v3') || '[]');
     const newTicket = {
       ...ticket,
       id: Date.now().toString(),
       time: 'Just now'
     };
     const updated = [newTicket, ...stored];
-    localStorage.setItem('trustflow_tickets_v2', JSON.stringify(updated));
+    localStorage.setItem('trustflow_tickets_v3', JSON.stringify(updated));
     window.dispatchEvent(new Event('trustflow_sync'));
     return newTicket.id;
   };
