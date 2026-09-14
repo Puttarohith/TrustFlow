@@ -44,7 +44,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
               <span className="bg-primary text-white text-[10px] px-2 py-0.5 rounded-full font-bold">12</span>
             </Link>
             
-            <Link href="#" className="flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors">
+            <Link href="/agent/escalations" className="flex items-center justify-between px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors">
               <div className="flex items-center gap-3 text-sm">
                 <AlertTriangle className="w-4 h-4" />
                 Escalations
@@ -52,17 +52,17 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
               <span className="bg-status-danger text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">3</span>
             </Link>
             
-            <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
+            <Link href="/agent/investigations" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
               <Search className="w-4 h-4" />
               Investigations
             </Link>
             
-            <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
+            <Link href="/agent/knowledge" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
               <BookOpen className="w-4 h-4" />
               Knowledge Base
             </Link>
             
-            <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
+            <Link href="/agent/customers" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
               <Users className="w-4 h-4" />
               Customers
             </Link>
@@ -76,7 +76,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
 
         {/* Footer Settings */}
         <div className="p-3 border-t border-border space-y-1">
-          <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
+          <Link href="/agent/settings" className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-white/5 hover:text-white transition-colors text-sm">
             <Settings className="w-4 h-4" />
             Settings
           </Link>
