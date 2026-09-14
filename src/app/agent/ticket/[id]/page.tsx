@@ -35,6 +35,8 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
       }]
     });
     setHumanReply('');
+  };
+
   const handleResolve = () => {
     if (!ticket) return;
     updateTicket(ticket.id, {
