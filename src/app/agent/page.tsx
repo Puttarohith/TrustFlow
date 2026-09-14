@@ -2,16 +2,10 @@
 
 import { Search, Filter, Box, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
-
-// Mock Kanban Data
-const mockTickets = [
-  { id: '1', customer: 'Sarah Jenkins', tier: 'Platinum', subject: 'Missing Order #4521', intent: 'Orders', sentiment: 'Frustrated', urgency: 'High', score: 72, time: '2m ago', agent: 'Orders AI', status: 'escalated' },
-  { id: '2', customer: 'Michael Chen', tier: 'Gold', subject: 'Double charged on invoice', intent: 'Billing', sentiment: 'Angry', urgency: 'Critical', score: 95, time: '15m ago', agent: 'Billing AI', status: 'open' },
-  { id: '3', customer: 'Emma Watson', tier: 'Standard', subject: 'How to reset password?', intent: 'Account', sentiment: 'Neutral', urgency: 'Low', score: 10, time: '1h ago', agent: 'Account AI', status: 'resolved' },
-  { id: '4', customer: 'David Smith', tier: 'Silver', subject: 'Defective product received', intent: 'Orders', sentiment: 'Frustrated', urgency: 'Medium', score: 45, time: '5m ago', agent: 'Orders AI', status: 'in_progress' }
-];
+import { useTickets } from '@/hooks/use-tickets';
 
 export default function AgentQueuePage() {
+  const { tickets } = useTickets();
   const renderCard = (ticket: any) => (
     <Link href={`/agent/ticket/${ticket.id}`} key={ticket.id} className="block group">
       <div className={`glass-card p-4 rounded-xl border-l-4 mb-3 cursor-pointer ${
@@ -133,7 +127,7 @@ export default function AgentQueuePage() {
               <span className="text-xs text-text-secondary bg-surface px-2 py-0.5 rounded-full">1</span>
             </div>
             <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">
-              {mockTickets.filter(t => t.status === 'open').map(renderCard)}
+              {tickets.filter(t => t.status === 'open').map(renderCard)}
             </div>
           </div>
 
@@ -147,7 +141,7 @@ export default function AgentQueuePage() {
               <span className="text-xs text-text-secondary bg-surface px-2 py-0.5 rounded-full">1</span>
             </div>
             <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">
-              {mockTickets.filter(t => t.status === 'in_progress').map(renderCard)}
+              {tickets.filter(t => t.status === 'in_progress').map(renderCard)}
             </div>
           </div>
 
@@ -161,7 +155,7 @@ export default function AgentQueuePage() {
               <span className="text-xs text-status-danger bg-status-danger/10 px-2 py-0.5 rounded-full">1</span>
             </div>
             <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">
-              {mockTickets.filter(t => t.status === 'escalated').map(renderCard)}
+              {tickets.filter(t => t.status === 'escalated').map(renderCard)}
             </div>
           </div>
 
@@ -175,7 +169,7 @@ export default function AgentQueuePage() {
               <span className="text-xs text-text-secondary bg-surface px-2 py-0.5 rounded-full">1</span>
             </div>
             <div className="flex-grow overflow-y-auto custom-scrollbar pr-2 opacity-60 hover:opacity-100 transition-opacity">
-              {mockTickets.filter(t => t.status === 'resolved').map(renderCard)}
+              {tickets.filter(t => t.status === 'resolved').map(renderCard)}
             </div>
           </div>
         </div>

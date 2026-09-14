@@ -24,21 +24,18 @@ type Message = {
   };
 };
 
+import { useTickets } from '@/hooks/use-tickets';
+
 export default function CustomerChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      sender: 'ai',
-      agentType: 'orders',
-      content: 'Hello Sarah! I see you are a Platinum member. I am TrustFlow\'s Orders Specialist. How can I assist you with your purchases today?',
-      timestamp: '10:00 AM'
-    }
-  ]);
+  const { tickets, updateTicket } = useTickets();
+  const ticket = tickets.find(t => t.id === '1') || tickets[0];
+  const messages = ticket?.messages || [];
+
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isEscalated, setIsEscalated] = useState(false);
-  const [isResolved, setIsResolved] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const isEscalated = ticket?.status === 'escalated';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,17 +47,17 @@ export default function CustomerChatPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || !ticket) return;
 
     // Add user message
-    const userMessage: Message = {
+    const userMessage: any = {
       id: Date.now().toString(),
       sender: 'customer',
       content: inputValue,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    updateTicket(ticket.id, { messages: [...messages, userMessage] });
     setInputValue('');
     setIsTyping(true);
 
@@ -84,7 +81,7 @@ export default function CustomerChatPage() {
       setIsTyping(false);
 
       if (data.reply) {
-        const aiResponse: Message = {
+        const aiResponse: any = {
           id: (Date.now() + 1).toString(),
           sender: 'ai',
           agentType: 'orders',
@@ -98,23 +95,24 @@ export default function CustomerChatPage() {
           }
         };
 
-        setMessages(prev => [...prev, aiResponse]);
-
-        if (data.escalated) {
-          setIsEscalated(true);
-        }
+        updateTicket(ticket.id, { 
+          messages: [...messages, userMessage, aiResponse],
+          status: data.escalated ? 'escalated' : ticket.status,
+          time: 'Just now'
+        });
       }
     } catch (error) {
       console.error('Failed to send message:', error);
       setIsTyping(false);
       // Fallback message
-      setMessages(prev => [...prev, {
+      const fallbackMsg: any = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
         agentType: 'orders',
         content: "I'm sorry, I'm having trouble connecting right now. Let me transfer you to a human agent.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }]);
+      };
+      updateTicket(ticket.id, { messages: [...messages, userMessage, fallbackMsg] });
     }
   };
 

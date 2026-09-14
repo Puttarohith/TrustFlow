@@ -9,37 +9,31 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+import { useTickets } from '@/hooks/use-tickets';
+
 export default function AgentTicketDetailPage({ params }: { params: { id: string } }) {
+  const { tickets, updateTicket } = useTickets();
+  const ticket = tickets.find(t => t.id === params.id) || tickets[0];
+  const messages = ticket?.messages || [];
+
   const [internalNote, setInternalNote] = useState('');
   const [isInvestigating, setIsInvestigating] = useState(false);
   const [showInvestigation, setShowInvestigation] = useState(false);
 
   const [humanReply, setHumanReply] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      sender: 'customer',
-      content: 'Hello, I just checked my bank statement and I was charged twice for the Sony headphones I bought last week! This is ridiculous, please fix this immediately or I am calling my credit card company.',
-      time: '10:00 AM'
-    },
-    {
-      id: '2',
-      sender: 'ai',
-      agentType: 'Billing AI',
-      content: 'I am so sorry to hear that you were charged twice, Michael. I understand how frustrating that is. I have checked our internal ledger for order #9021, but I am only seeing a single successful capture of $348.00.\n\nSince you are seeing two charges on your bank statement, I am escalating this immediately to a human Billing Specialist to investigate the payment gateway logs. They will be with you shortly.',
-      time: '10:01 AM'
-    }
-  ]);
 
   const handleSendReply = () => {
-    if (!humanReply.trim()) return;
-    setMessages(prev => [...prev, {
-      id: Date.now().toString(),
-      sender: 'human',
-      agentType: 'Human Agent',
-      content: humanReply,
-      time: 'Just now'
-    }]);
+    if (!humanReply.trim() || !ticket) return;
+    
+    updateTicket(ticket.id, {
+      messages: [...messages, {
+        id: Date.now().toString(),
+        sender: 'human',
+        agentType: 'Human Agent',
+        content: humanReply,
+        timestamp: 'Just now'
+      }]
+    });
     setHumanReply('');
   };
 
@@ -60,12 +54,12 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
         {/* Customer Profile Card */}
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-20 h-20 rounded-full border-4 border-yellow-500/30 bg-yellow-500/10 flex items-center justify-center mb-3">
-            <span className="text-2xl font-bold text-yellow-500">MC</span>
+            <span className="text-2xl font-bold text-yellow-500">{ticket.customer.split(' ').map(n=>n[0]).join('')}</span>
           </div>
-          <h2 className="text-lg font-bold text-white">Michael Chen</h2>
-          <p className="text-sm text-text-secondary mb-2">michael.chen@example.com</p>
+          <h2 className="text-lg font-bold text-white">{ticket.customer}</h2>
+          <p className="text-sm text-text-secondary mb-2">{ticket.customer.toLowerCase().replace(' ', '.')}@example.com</p>
           <span className="bg-yellow-500/20 text-yellow-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider mb-4">
-            Gold Tier
+            {ticket.tier} Tier
           </span>
           
           <div className="w-full grid grid-cols-2 gap-2 text-left bg-background p-3 rounded-lg border border-border">
@@ -121,12 +115,14 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
         <div className="h-16 flex-shrink-0 border-b border-border p-4 flex items-center justify-between bg-surface/50">
           <div>
             <h2 className="font-bold text-white flex items-center gap-2">
-              Double charged on invoice
-              <span className="bg-status-danger/20 text-status-danger text-[10px] px-2 py-0.5 rounded uppercase font-bold border border-status-danger/30">
-                Escalated
-              </span>
+              {ticket.subject}
+              {ticket.status === 'escalated' && (
+                <span className="bg-status-danger/20 text-status-danger text-[10px] px-2 py-0.5 rounded uppercase font-bold border border-status-danger/30">
+                  Escalated
+                </span>
+              )}
             </h2>
-            <p className="text-xs text-text-secondary">Ticket #{params.id} • Assigned to: Human Queue</p>
+            <p className="text-xs text-text-secondary">Ticket #{ticket.id} • Assigned to: Human Queue</p>
           </div>
           <div className="flex gap-2">
             <button className="px-3 py-1.5 bg-status-success/10 text-status-success border border-status-success/30 rounded text-xs font-bold hover:bg-status-success/20 transition-colors">
@@ -216,7 +212,7 @@ export default function AgentTicketDetailPage({ params }: { params: { id: string
                       "text-xs font-bold",
                       msg.sender === 'ai' ? "text-purple-400" : "text-primary"
                     )}>{msg.agentType}</span>
-                    <span className="text-[10px] text-text-secondary ml-auto">{msg.time}</span>
+                    <span className="text-[10px] text-text-secondary ml-auto">{msg.timestamp}</span>
                   </div>
                   <p className="text-sm text-white leading-relaxed whitespace-pre-wrap">
                     {msg.content}
